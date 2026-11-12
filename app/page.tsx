@@ -1,5 +1,5 @@
 "use client"; // run this page in the browser, so it can use state and clicks
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Trip } from "@/lib/types";
 
 // Example trips shown when the page first loads
@@ -16,6 +16,15 @@ export default function Home() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // Runs once, when the page first appears
+  useEffect(() => {
+    const saveTrips = localStorage.getItem("tripSaved")
+    if (saveTrips === null) return; 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading saved trips once on first load
+    setTrips(JSON.parse(saveTrips))
+
+  }, []);
+
   // Runs when "Add trip" is clicked
   function addTrip() {
     // Guard: stop if any box is empty (|| means "or")
@@ -30,7 +39,11 @@ export default function Home() {
     };
 
     // Make a new list: all the old trips plus the new one
-    setTrips([...trips, newTrip]);
+    const newTrips = [...trips, newTrip];
+
+    // Show the new list on the page, and save it in the browser
+    setTrips(newTrips);
+    localStorage.setItem("tripSaved", JSON.stringify(newTrips));
 
     // Empty the form boxes, ready for the next trip
     setDestination("");
